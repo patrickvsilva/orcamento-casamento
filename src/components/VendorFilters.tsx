@@ -11,9 +11,9 @@ export function VendorFilters() {
   const currentCategory = searchParams.get("category") || "all";
   const currentStatus = searchParams.get("status") || "all";
 
-  const updateFilters = (key: string, value: string) => {
+  const updateFilters = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (value === "all") {
+    if (!value || value === "all") {
       params.delete(key);
     } else {
       params.set(key, value);
