@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { vendorSchema, VendorFormData } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 
-export async function getVendors(filters?: { status?: string; category?: string }) {
+export async function getVendors(filters?: { status?: string; category?: string; sort?: string; dir?: 'asc' | 'desc' }) {
   try {
     const where: any = {};
     if (filters?.category && filters.category !== "all") {
@@ -32,6 +32,27 @@ export async function getVendors(filters?: { status?: string; category?: string 
         if (filters.status === "paid") return isPaid;
         if (filters.status === "pending") return !isPaid;
         return true;
+      });
+    }
+
+    if (filters?.sort) {
+      parsedVendors.sort((a, b) => {
+        let aVal: any = a[filters.sort as keyof typeof a];
+        let bVal: any = b[filters.sort as keyof typeof b];
+
+        if (filters.sort === 'remaining') {
+          aVal = (a.contracted_amount || 0) - a.paid_amount;
+          bVal = (b.contracted_amount || 0) - b.paid_amount;
+        }
+
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+           const comp = aVal.localeCompare(bVal);
+           return filters.dir === 'desc' ? -comp : comp;
+        }
+
+        if (aVal === bVal) return 0;
+        const comparison = (aVal ?? 0) > (bVal ?? 0) ? 1 : -1;
+        return filters.dir === 'desc' ? -comparison : comparison;
       });
     }
 

@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+import Link from "next/link";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { getVendors, deleteVendor } from "@/app/actions";
 import { VendorForm } from "@/components/VendorForm";
 import { VendorFilters } from "@/components/VendorFilters";
@@ -13,14 +15,43 @@ import { formatCurrency } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 
+function SortHeader({ title, column, currentSort, currentDir, align = "left", searchParams }: { title: string, column: string, currentSort?: string, currentDir?: string, align?: "left" | "right", searchParams: any }) {
+  const isSorted = currentSort === column;
+  const newDir = isSorted && currentDir === 'asc' ? 'desc' : 'asc';
+  
+  const params = new URLSearchParams(searchParams);
+  params.set('sort', column);
+  params.set('dir', newDir);
+
+  return (
+    <TableHead className={align === 'right' ? 'text-right' : ''}>
+      <Link href={`/?${params.toString()}`} className="group inline-flex items-center hover:text-foreground">
+        {title}
+        {isSorted ? (
+          currentDir === 'asc' ? <ArrowUp className="ml-1.5 h-3 w-3" /> : <ArrowDown className="ml-1.5 h-3 w-3" />
+        ) : (
+          <ArrowUpDown className="ml-1.5 h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+        )}
+      </Link>
+    </TableHead>
+  );
+}
+
 export default async function Home(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const searchParams = await props.searchParams;
-  const category = typeof searchParams.category === 'string' ? searchParams.category : undefined;
-  const status = typeof searchParams.status === 'string' ? searchParams.status : undefined;
+  const resolvedSearchParams = await props.searchParams;
+  const category = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
+  const status = typeof resolvedSearchParams.status === 'string' ? resolvedSearchParams.status : undefined;
+  const sort = typeof resolvedSearchParams.sort === 'string' ? resolvedSearchParams.sort : undefined;
+  const dir = resolvedSearchParams.dir === 'desc' ? 'desc' : 'asc';
+
+  // Convert to simple record for building links
+  const spRecord = Object.fromEntries(
+    Object.entries(resolvedSearchParams).filter(([_, v]) => typeof v === 'string')
+  ) as Record<string, string>;
 
   let vendors: any[] = [];
   try {
-    vendors = await getVendors({ category, status });
+    vendors = await getVendors({ category, status, sort, dir });
   } catch (e) {
     // Handling the case where DB is not connected yet
     console.warn("DB not connected yet");
@@ -83,11 +114,11 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Fornecedor</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead className="text-right">Orçado</TableHead>
-              <TableHead className="text-right">Contratado</TableHead>
-              <TableHead className="text-right">Falta Pagar</TableHead>
+              <SortHeader title="Fornecedor" column="name" currentSort={sort} currentDir={dir} searchParams={spRecord} />
+              <SortHeader title="Categoria" column="category" currentSort={sort} currentDir={dir} searchParams={spRecord} />
+              <SortHeader title="Orçado" column="budgeted_amount" currentSort={sort} currentDir={dir} align="right" searchParams={spRecord} />
+              <SortHeader title="Contratado" column="contracted_amount" currentSort={sort} currentDir={dir} align="right" searchParams={spRecord} />
+              <SortHeader title="Falta Pagar" column="remaining" currentSort={sort} currentDir={dir} align="right" searchParams={spRecord} />
               <TableHead className="w-[100px] text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -154,8 +185,8 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Fornecedor</TableHead>
-              <TableHead className="text-right">Falta Pagar</TableHead>
+              <SortHeader title="Fornecedor" column="name" currentSort={sort} currentDir={dir} searchParams={spRecord} />
+              <SortHeader title="Falta Pagar" column="remaining" currentSort={sort} currentDir={dir} align="right" searchParams={spRecord} />
               <TableHead className="w-[80px] text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
