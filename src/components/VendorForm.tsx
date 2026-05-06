@@ -29,7 +29,7 @@ type Vendor = VendorFormData & { id?: string };
 
 interface VendorFormProps {
   vendor?: Vendor;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
   onSuccess?: () => void;
 }
 
