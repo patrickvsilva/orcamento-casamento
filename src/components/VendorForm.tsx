@@ -102,7 +102,7 @@ export function VendorForm({ vendor, trigger, onSuccess }: VendorFormProps) {
             <Label htmlFor="category">Categoria</Label>
             <Select 
               value={watch("category")} 
-              onValueChange={(val) => setValue("category", val)}
+              onValueChange={(val) => setValue("category", val || "")}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma categoria" />
