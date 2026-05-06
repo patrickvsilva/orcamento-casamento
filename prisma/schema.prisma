@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Vendor {
+  id                String   @id @default(uuid())
+  name              String
+  service           String
+  category          String
+  budgeted_amount   Decimal  @db.Decimal(10, 2)
+  contracted_amount Decimal? @db.Decimal(10, 2)
+  paid_amount       Decimal  @default(0) @db.Decimal(10, 2)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  @@map("vendors")
+}
