@@ -12,7 +12,7 @@ function parseMoney(val: string): number {
 async function main() {
   const fileContent = fs.readFileSync('data.csv', 'utf8');
   
-  const records = parse(fileContent, {
+  const records: any[] = parse(fileContent, {
     columns: true,
     skip_empty_lines: true,
   });
