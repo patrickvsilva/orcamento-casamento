@@ -11,11 +11,11 @@ function parseMoney(val: string): number {
 
 async function main() {
   const fileContent = fs.readFileSync('data.csv', 'utf8');
-  
-  const records: any[] = parse(fileContent, {
+
+  const records = parse(fileContent, {
     columns: true,
     skip_empty_lines: true,
-  });
+  }) as Record<string, string>[];
 
   console.log(`Encontrados ${records.length} registros. Sincronizando...`);
 
@@ -26,7 +26,7 @@ async function main() {
     const category = record['Categoria'] || 'Outros';
     const contracted = parseMoney(record['Valor Contratado']);
     const paid = parseMoney(record['Valor Pago']);
-    
+
     const budgeted = contracted;
 
     await prisma.vendor.create({
@@ -37,7 +37,7 @@ async function main() {
         budgeted_amount: budgeted,
         contracted_amount: contracted,
         paid_amount: paid,
-      }
+      },
     });
     console.log(`Criado fornecedor: ${name}`);
   }
@@ -45,4 +45,6 @@ async function main() {
   console.log('Seed completo!');
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect());
+main()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());
