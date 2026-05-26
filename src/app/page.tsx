@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import { getVendors, deleteVendor } from "@/app/actions";
+import { getVendors } from "@/app/actions";
 import { VendorForm } from "@/components/VendorForm";
 import { VendorFilters } from "@/components/VendorFilters";
+import { DeleteVendorButton } from "@/components/DeleteVendorButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -163,13 +164,7 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
                           vendor={vendor} 
                           trigger={<Button variant="outline" size="sm">Editar</Button>} 
                         />
-                        <form action={async () => {
-                          "use server";
-                          await prisma.vendor.delete({ where: { id: vendor.id } });
-                          revalidatePath("/");
-                        }}>
-                          <Button variant="destructive" size="sm" type="submit">Excluir</Button>
-                        </form>
+                        <DeleteVendorButton id={vendor.id} />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -223,13 +218,7 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
                           vendor={vendor} 
                           trigger={<Button variant="outline" size="sm" className="w-full text-xs h-7">Editar</Button>} 
                         />
-                        <form action={async () => {
-                          "use server";
-                          await prisma.vendor.delete({ where: { id: vendor.id } });
-                          revalidatePath("/");
-                        }}>
-                          <Button variant="destructive" size="sm" type="submit" className="w-full text-xs h-7">Excluir</Button>
-                        </form>
+                        <DeleteVendorButton id={vendor.id} className="w-full text-xs h-7" />
                       </div>
                     </TableCell>
                   </TableRow>
