@@ -1,6 +1,7 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
+import { AppProviders } from '@/components/providers/AppProviders';
 import './globals.css';
 
 const geistSans = Geist({
@@ -20,8 +21,15 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'Orçamento',
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#34A86F' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1f2e' },
+  ],
 };
 
 export default function RootLayout({
@@ -30,10 +38,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="pt-BR" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background">
-        {children}
-        <Toaster richColors />
+        <AppProviders>
+          {children}
+          <Toaster richColors />
+        </AppProviders>
       </body>
     </html>
   );

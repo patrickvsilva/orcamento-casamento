@@ -1,6 +1,8 @@
 import Link from 'next/link';
-import { ChevronRight, Heart, List, Clock } from 'lucide-react';
+import { ChevronRight, Heart, List, Clock, Palette } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt';
 import { VENDOR_CATEGORIES } from '@/lib/constants';
 import { fetchVendors } from '@/lib/vendor-utils';
 
@@ -28,6 +30,21 @@ export default async function MaisPage() {
           {vendors.length} fornecedores cadastrados · {VENDOR_CATEGORIES.length} categorias
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Palette className="h-4 w-4 text-primary" />
+            Aparência
+          </CardTitle>
+          <CardDescription>Alterne entre modo claro e escuro</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ThemeToggle showLabel className="w-full justify-start" />
+        </CardContent>
+      </Card>
+
+      <PwaInstallPrompt />
 
       <div className="space-y-2">
         <Link

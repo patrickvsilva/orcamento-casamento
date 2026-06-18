@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { formatCurrency } from '@/lib/utils';
+import { triggerHaptic } from '@/hooks/use-haptic';
 import { toast } from 'sonner';
 
 interface QuickPaymentActionsProps {
@@ -56,6 +57,7 @@ function PartialPaymentForm({
   const onSubmit = async (data: QuickPaymentData) => {
     try {
       await recordVendorPayment(vendorId, data.amount);
+      triggerHaptic(10);
       toast.success(`Pagamento de ${formatCurrency(data.amount)} registrado!`);
       router.refresh();
       onSuccess();
@@ -166,6 +168,7 @@ export function QuickPaymentActions({ vendorId, vendorName, remaining }: QuickPa
     startTransition(async () => {
       try {
         await recordVendorPayment(vendorId, remaining);
+        triggerHaptic([10, 20, 10]);
         toast.success(`${vendorName} quitado — ${formatCurrency(remaining)} registrado!`);
         router.refresh();
       } catch (error) {

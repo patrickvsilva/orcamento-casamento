@@ -46,16 +46,16 @@ Prioridades e status do produto. Atualizado em jun/2026.
 
 ---
 
-## Sprint 3+ — Polish e PWA
+## Sprint 3+ — Polish e PWA ✅
 
 | ID | Item | Status |
 |----|------|--------|
-| MOB-30 | Transições entre telas | ⬜ |
-| MOB-31 | Toggle de dark mode na UI | ⬜ |
-| MOB-32 | Feedback háptico (onde suportado) | ⬜ |
-| MOB-33 | Pull-to-refresh | ⬜ |
-| MOB-34 | Skeletons de carregamento | ⬜ |
-| MOB-35 | Swipe para ações no card | ⬜ |
+| MOB-30 | Transições entre telas | ✅ |
+| MOB-31 | Toggle de dark mode na UI | ✅ |
+| MOB-32 | Feedback háptico (onde suportado) | ✅ |
+| MOB-33 | Pull-to-refresh | ✅ |
+| MOB-34 | Skeletons de carregamento | ✅ |
+| MOB-35 | Swipe para ações no card | ✅ |
 
 ### PWA
 
@@ -63,9 +63,9 @@ Prioridades e status do produto. Atualizado em jun/2026.
 |----|------|--------|
 | PWA-01 | `manifest.webmanifest` | ✅ |
 | PWA-02 | Ícones / apple-touch-icon | ✅ |
-| PWA-03 | Service worker offline | ⬜ |
-| PWA-04 | Instalação guiada (prompt) | ⬜ |
-| PWA-05 | Splash screen customizada | ⬜ |
+| PWA-03 | Service worker offline | ✅ |
+| PWA-04 | Instalação guiada (prompt) | ✅ |
+| PWA-05 | Splash screen customizada | ✅ |
 
 ---
 
@@ -98,5 +98,5 @@ Prioridades e status do produto. Atualizado em jun/2026.
 ## Próximo foco sugerido
 
 1. **DATA-02 / DATA-03** — vencimentos e status explícito  
-2. **PWA-03** — service worker para uso offline básico  
-3. **MOB-30** — transições e polish visual
+2. **QA-01** — testes unitários nas server actions  
+3. **QA-03** — coluna "Valor pago" na tabela desktop
