@@ -63,7 +63,7 @@ export function LiquidGlassTabBar() {
             trigger={
               <Button
                 size="icon"
-                className="liquid-glass h-12 w-12 rounded-full border-primary/20 shadow-lg"
+                className="h-12 w-12 rounded-full shadow-lg ring-4 ring-background"
                 aria-label="Adicionar fornecedor"
               >
                 <Plus className="h-6 w-6" />

@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 import {
   getVendorRemaining,
   isVendorFullyPaid,
@@ -144,7 +144,10 @@ export function VendorTable({
                 const isFullyPaid = isVendorFullyPaid(vendor);
 
                 return (
-                  <TableRow key={vendor.id}>
+                  <TableRow
+                    key={vendor.id}
+                    className={cn(isFullyPaid && 'bg-primary/10 hover:bg-primary/10')}
+                  >
                     <TableCell>
                       <div className="font-medium">{vendor.name}</div>
                       <div className="text-xs text-muted-foreground">{vendor.service}</div>
@@ -160,7 +163,7 @@ export function VendorTable({
                     </TableCell>
                     <TableCell className="text-right">
                       {isFullyPaid ? (
-                        <Badge variant="secondary">Pago</Badge>
+                        <Badge>Pago</Badge>
                       ) : (
                         <span className="font-medium text-destructive">
                           {formatCurrency(remaining)}
@@ -199,7 +202,13 @@ export function VendorTable({
             const isFullyPaid = isVendorFullyPaid(vendor);
 
             return (
-              <div key={vendor.id} className="rounded-xl border bg-card p-4">
+              <div
+                key={vendor.id}
+                className={cn(
+                  'rounded-xl border p-4',
+                  isFullyPaid ? 'border-primary/20 bg-primary/10' : 'bg-card',
+                )}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-medium">{vendor.name}</p>
@@ -210,11 +219,13 @@ export function VendorTable({
                   </div>
                   <div className="text-right">
                     {isFullyPaid ? (
-                      <Badge variant="secondary">Pago</Badge>
+                      <Badge>Pago</Badge>
                     ) : (
-                      <p className="font-semibold text-destructive">{formatCurrency(remaining)}</p>
+                      <>
+                        <p className="font-semibold text-destructive">{formatCurrency(remaining)}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">falta pagar</p>
+                      </>
                     )}
-                    <p className="mt-1 text-xs text-muted-foreground">falta pagar</p>
                   </div>
                 </div>
                 <div className="mt-3 flex gap-2">

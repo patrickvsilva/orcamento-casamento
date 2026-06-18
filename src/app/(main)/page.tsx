@@ -1,15 +1,22 @@
 import Link from 'next/link';
 import { ArrowRight, List, Clock } from 'lucide-react';
 import { BudgetSummaryCards } from '@/components/BudgetSummaryCards';
+import { CategorySpendingChart } from '@/components/CategorySpendingChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { buttonVariants } from '@/components/ui/button';
-import { computeBudgetTotals, fetchVendors, getVendorRemaining } from '@/lib/vendor-utils';
+import {
+  computeBudgetTotals,
+  computeCategorySpending,
+  fetchVendors,
+  getVendorRemaining,
+} from '@/lib/vendor-utils';
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
 export default async function ResumoPage() {
   const vendors = await fetchVendors();
   const totals = computeBudgetTotals(vendors);
+  const categorySpending = computeCategorySpending(vendors);
 
   const allPendingVendors = vendors.filter((v) => {
     const remaining = getVendorRemaining(v);
@@ -28,6 +35,8 @@ export default async function ResumoPage() {
       </div>
 
       <BudgetSummaryCards {...totals} />
+
+      <CategorySpendingChart data={categorySpending} />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
