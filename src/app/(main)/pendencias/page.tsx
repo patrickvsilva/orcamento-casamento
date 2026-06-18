@@ -1,7 +1,6 @@
-import { VendorForm } from '@/components/VendorForm';
+import { QuickPaymentActions } from '@/components/QuickPaymentActions';
 import { DeleteVendorButton } from '@/components/DeleteVendorButton';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   computeBudgetTotals,
@@ -75,16 +74,13 @@ export default async function PendenciasPage() {
                   />
                 </div>
 
-                <div className="mt-3 flex gap-2">
-                  <VendorForm
-                    vendor={vendor}
-                    trigger={
-                      <Button variant="outline" size="sm" className="flex-1">
-                        Registrar pagamento
-                      </Button>
-                    }
+                <div className="mt-3 space-y-2">
+                  <QuickPaymentActions
+                    vendorId={vendor.id}
+                    vendorName={vendor.name}
+                    remaining={remaining}
                   />
-                  <DeleteVendorButton id={vendor.id} className="shrink-0" />
+                  <DeleteVendorButton id={vendor.id} className="w-full" variant="outline" />
                 </div>
               </div>
             );

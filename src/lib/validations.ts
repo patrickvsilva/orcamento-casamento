@@ -16,4 +16,10 @@ export const vendorSchema = z.object({
 
 export type VendorFormData = z.infer<typeof vendorSchema>;
 
+export const quickPaymentSchema = z.object({
+  amount: z.coerce.number().positive('Informe um valor maior que zero'),
+});
+
+export type QuickPaymentData = z.infer<typeof quickPaymentSchema>;
+
 export { VENDOR_CATEGORIES };
