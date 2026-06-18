@@ -15,7 +15,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Orçamento Casamento',
-  description: 'Orçamento Casamento',
+  description: 'Controle financeiro dos fornecedores do seu casamento',
+  applicationName: 'Orçamento Casamento',
+  appleWebApp: {
+    capable: true,
+    title: 'Orçamento',
+    statusBarStyle: 'default',
+  },
 };
 
 export default function RootLayout({
