@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm, useWatch, Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { vendorSchema, VendorFormData } from '@/lib/validations';
@@ -42,6 +43,7 @@ interface VendorFormProps {
 }
 
 export function VendorForm({ vendor, trigger, onSuccess }: VendorFormProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const isEditing = !!vendor?.id;
 
@@ -80,6 +82,7 @@ export function VendorForm({ vendor, trigger, onSuccess }: VendorFormProps) {
       }
       setOpen(false);
       reset();
+      router.refresh();
       onSuccess?.();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao salvar fornecedor');
