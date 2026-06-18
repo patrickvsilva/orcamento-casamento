@@ -1,5 +1,7 @@
 import { getVendors } from '@/app/actions';
 
+import { getVendorRemainingAmounts, isVendorFullyPaidAmounts } from '@/lib/vendor-status';
+
 export type Vendor = Awaited<ReturnType<typeof getVendors>>[number];
 
 export async function fetchVendors(filters?: Parameters<typeof getVendors>[0]) {
@@ -12,13 +14,11 @@ export async function fetchVendors(filters?: Parameters<typeof getVendors>[0]) {
 }
 
 export function getVendorRemaining(vendor: Vendor) {
-  const contracted = vendor.contracted_amount || 0;
-  return contracted - vendor.paid_amount;
+  return getVendorRemainingAmounts(vendor);
 }
 
 export function isVendorFullyPaid(vendor: Vendor) {
-  const contracted = vendor.contracted_amount || 0;
-  return contracted > 0 && getVendorRemaining(vendor) <= 0;
+  return isVendorFullyPaidAmounts(vendor);
 }
 
 export function computeBudgetTotals(vendors: Vendor[]) {

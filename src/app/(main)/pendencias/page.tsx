@@ -8,13 +8,20 @@ import {
   getVendorRemaining,
   isVendorFullyPaid,
 } from '@/lib/vendor-utils';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDueDate } from '@/lib/utils';
 
 export default async function PendenciasPage() {
   const vendors = await fetchVendors();
   const pendingVendors = vendors
     .filter((v) => !isVendorFullyPaid(v) && (v.contracted_amount || 0) > 0)
-    .sort((a, b) => getVendorRemaining(b) - getVendorRemaining(a));
+    .sort((a, b) => {
+      if (a.next_due_date && b.next_due_date) {
+        return a.next_due_date.getTime() - b.next_due_date.getTime();
+      }
+      if (a.next_due_date) return -1;
+      if (b.next_due_date) return 1;
+      return getVendorRemaining(b) - getVendorRemaining(a);
+    });
 
   const { totalRemaining } = computeBudgetTotals(vendors);
 
@@ -60,6 +67,11 @@ export default async function PendenciasPage() {
                     <Badge variant="outline" className="mt-2">
                       {vendor.category}
                     </Badge>
+                    {vendor.next_due_date && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Vence em {formatDueDate(vendor.next_due_date)}
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-destructive">{formatCurrency(remaining)}</p>

@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, formatDueDate, cn } from '@/lib/utils';
 import {
   getVendorRemaining,
   isVendorFullyPaid,
@@ -121,6 +121,24 @@ export function VendorTable({
                 basePath={basePath}
               />
               <SortHeader
+                title="Pago"
+                column="paid_amount"
+                currentSort={sort}
+                currentDir={dir}
+                align="right"
+                searchParams={searchParams}
+                basePath={basePath}
+              />
+              <SortHeader
+                title="Vencimento"
+                column="next_due_date"
+                currentSort={sort}
+                currentDir={dir}
+                align="right"
+                searchParams={searchParams}
+                basePath={basePath}
+              />
+              <SortHeader
                 title="Falta Pagar"
                 column="remaining"
                 currentSort={sort}
@@ -135,7 +153,7 @@ export function VendorTable({
           <TableBody>
             {vendors.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
                   Nenhum fornecedor cadastrado.
                 </TableCell>
               </TableRow>
@@ -161,6 +179,12 @@ export function VendorTable({
                     </TableCell>
                     <TableCell className="text-right">
                       {vendor.contracted_amount ? formatCurrency(vendor.contracted_amount) : '-'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(vendor.paid_amount)}
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      {formatDueDate(vendor.next_due_date)}
                     </TableCell>
                     <TableCell className="text-right">
                       {isFullyPaid ? (

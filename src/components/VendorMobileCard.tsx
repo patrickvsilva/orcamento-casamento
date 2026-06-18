@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sheet';
 import { VendorForm } from '@/components/VendorForm';
 import { DeleteVendorButton } from '@/components/DeleteVendorButton';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, formatDueDate, cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/use-haptic';
 import {
   getVendorRemaining,
@@ -118,9 +118,14 @@ export function VendorMobileCard({ vendor }: { vendor: Vendor }) {
             <div className="min-w-0">
               <p className="font-medium">{vendor.name}</p>
               <p className="text-xs text-muted-foreground">{vendor.service}</p>
-              <Badge variant="outline" className="mt-2">
-                {vendor.category}
-              </Badge>
+            <Badge variant="outline" className="mt-2">
+              {vendor.category}
+            </Badge>
+            {vendor.next_due_date && !isFullyPaid && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Vence em {formatDueDate(vendor.next_due_date)}
+              </p>
+            )}
             </div>
             <div className="flex items-start gap-2">
               <div className="text-right">
