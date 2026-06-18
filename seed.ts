@@ -1,12 +1,59 @@
+import 'dotenv/config';
 import { parse } from 'csv-parse/sync';
 import * as fs from 'fs';
+import { normalizeCategory } from './src/lib/categories';
 import { prisma } from './src/lib/db';
 
-function parseMoney(val: string): number {
+type CsvRecord = Record<string, string>;
+
+function parseMoney(val: string | undefined): number {
   if (!val) return 0;
-  // Remove "R$ ", replace "." with "", replace "," with "."
-  const clean = val.replace('R$', '').trim().replace(/\./g, '').replace(',', '.');
+  const clean = val
+    .replace(/\u00a0/g, ' ')
+    .replace(/R\$/g, '')
+    .trim()
+    .replace(/\./g, '')
+    .replace(',', '.');
   return parseFloat(clean) || 0;
+}
+
+function parseContracted(val: string | undefined): number | null {
+  const amount = parseMoney(val);
+  return amount > 0 ? amount : null;
+}
+
+function resolveBudgeted(record: CsvRecord, contracted: number | null, paid: number): number {
+  const budgetedFromCsv = parseMoney(record['Valor Orçado']);
+  if (budgetedFromCsv > 0) return budgetedFromCsv;
+
+  if (contracted && contracted > 0) return contracted;
+  if (paid > 0) return paid;
+
+  return 0;
+}
+
+async function upsertVendor(data: {
+  name: string;
+  service: string;
+  category: string;
+  budgeted_amount: number;
+  contracted_amount: number | null;
+  paid_amount: number;
+}) {
+  const existing = await prisma.vendor.findFirst({
+    where: { name: data.name },
+  });
+
+  if (existing) {
+    await prisma.vendor.update({
+      where: { id: existing.id },
+      data,
+    });
+    return 'atualizado';
+  }
+
+  await prisma.vendor.create({ data });
+  return 'criado';
 }
 
 async function main() {
@@ -15,34 +62,43 @@ async function main() {
   const records = parse(fileContent, {
     columns: true,
     skip_empty_lines: true,
-  }) as Record<string, string>[];
+  }) as CsvRecord[];
 
   console.log(`Encontrados ${records.length} registros. Sincronizando...`);
 
+  let created = 0;
+  let updated = 0;
+
   for (const record of records) {
-    const name = record['Nome'];
+    const name = record['Nome']?.trim();
     if (!name) continue;
 
-    const category = record['Categoria'] || 'Outros';
-    const contracted = parseMoney(record['Valor Contratado']);
+    const rawCategory = record['Categoria'] ?? 'Outros';
+    const category = normalizeCategory(rawCategory, name);
+    const contracted = parseContracted(record['Valor Contratado']);
     const paid = parseMoney(record['Valor Pago']);
+    const budgeted = resolveBudgeted(record, contracted, paid);
+    const service = record['Serviço']?.trim() || name;
 
-    const budgeted = contracted;
-
-    await prisma.vendor.create({
-      data: {
-        name,
-        service: name, // Using Name as service for now
-        category,
-        budgeted_amount: budgeted,
-        contracted_amount: contracted,
-        paid_amount: paid,
-      },
+    const result = await upsertVendor({
+      name,
+      service,
+      category,
+      budgeted_amount: budgeted,
+      contracted_amount: contracted,
+      paid_amount: paid,
     });
-    console.log(`Criado fornecedor: ${name}`);
+
+    if (result === 'criado') {
+      created += 1;
+      console.log(`Criado: ${name} [${category}]`);
+    } else {
+      updated += 1;
+      console.log(`Atualizado: ${name} [${category}]`);
+    }
   }
 
-  console.log('Seed completo!');
+  console.log(`Seed completo! ${created} criados, ${updated} atualizados.`);
 }
 
 main()

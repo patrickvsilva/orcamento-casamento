@@ -176,3 +176,37 @@
     @apply font-sans;
   }
 }
+
+:root {
+  --tab-bar-height: 4.5rem;
+  --glass-bg: oklch(1 0 0 / 0.72);
+  --glass-border: oklch(1 0 0 / 0.55);
+  --glass-shadow: 0 8px 32px oklch(0.35 0.05 163.5 / 0.1);
+  --glass-blur: 20px;
+}
+
+.dark {
+  --glass-bg: oklch(0.2 0.02 266.02 / 0.78);
+  --glass-border: oklch(0.95 0.01 238.46 / 0.12);
+  --glass-shadow: 0 8px 32px oklch(0 0 0 / 0.35);
+}
+
+@layer utilities {
+  .liquid-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .tab-bar-safe-area {
+    padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  @supports not (backdrop-filter: blur(1px)) {
+    .liquid-glass {
+      background: var(--background);
+    }
+  }
+}
