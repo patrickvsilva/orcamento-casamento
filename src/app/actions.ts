@@ -5,6 +5,13 @@ import { Prisma } from '@/generated/prisma/client';
 import { vendorSchema, VendorFormData } from '@/lib/validations';
 import { revalidatePath } from 'next/cache';
 
+function revalidateVendorPages() {
+  revalidatePath('/');
+  revalidatePath('/fornecedores');
+  revalidatePath('/pendencias');
+  revalidatePath('/mais');
+}
+
 export async function getVendors(filters?: {
   status?: string;
   category?: string;
@@ -104,7 +111,7 @@ export async function createVendor(data: VendorFormData) {
       },
     });
 
-    revalidatePath('/');
+    revalidateVendorPages();
     return { success: true };
   } catch (error) {
     console.error('Error creating vendor:', error);
@@ -132,7 +139,7 @@ export async function updateVendor(id: string, data: VendorFormData) {
       },
     });
 
-    revalidatePath('/');
+    revalidateVendorPages();
     return { success: true };
   } catch (error) {
     console.error('Error updating vendor:', error);
@@ -146,7 +153,7 @@ export async function deleteVendor(id: string) {
       where: { id },
     });
 
-    revalidatePath('/');
+    revalidateVendorPages();
     return { success: true };
   } catch (error) {
     console.error('Error deleting vendor:', error);
