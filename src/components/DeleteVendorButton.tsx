@@ -14,6 +14,7 @@ export function DeleteVendorButton({ id, className }: DeleteVendorButtonProps) {
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = () => {
+    if (isPending) return;
     if (window.confirm('Tem certeza que deseja excluir este fornecedor?')) {
       startTransition(async () => {
         try {

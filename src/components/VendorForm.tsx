@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm, useWatch, Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { vendorSchema, VendorFormData } from '@/lib/validations';
-import { VENDOR_CATEGORIES } from '@/lib/constants';
+import { VENDOR_CATEGORIES, normalizeCategory } from '@/lib/constants';
 import { createVendor, updateVendor } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,10 +25,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type Vendor = VendorFormData & { id?: string };
+type VendorInput = {
+  id?: string;
+  name?: string;
+  service?: string;
+  category?: string;
+  budgeted_amount?: number;
+  contracted_amount?: number | null;
+  paid_amount?: number;
+};
 
 interface VendorFormProps {
-  vendor?: Vendor;
+  vendor?: VendorInput;
   trigger?: React.ReactElement;
   onSuccess?: () => void;
 }
@@ -49,7 +57,7 @@ export function VendorForm({ vendor, trigger, onSuccess }: VendorFormProps) {
     defaultValues: {
       name: vendor?.name || '',
       service: vendor?.service || '',
-      category: vendor?.category || '',
+      category: (vendor?.category ? normalizeCategory(vendor.category, vendor.name) : '') as string,
       budgeted_amount: vendor?.budgeted_amount || 0,
       contracted_amount: vendor?.contracted_amount || null,
       paid_amount: vendor?.paid_amount || 0,
