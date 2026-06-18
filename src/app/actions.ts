@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/db';
 import { Prisma } from '@/generated/prisma/client';
-import { vendorSchema, VendorFormData } from '@/lib/validations';
+import { vendorSchema, VendorFormData, quickPaymentSchema } from '@/lib/validations';
 import { revalidatePath } from 'next/cache';
 
 function revalidateVendorPages() {
@@ -15,6 +15,7 @@ function revalidateVendorPages() {
 export async function getVendors(filters?: {
   status?: string;
   category?: string;
+  q?: string;
   sort?: string;
   dir?: 'asc' | 'desc';
 }) {
@@ -22,6 +23,14 @@ export async function getVendors(filters?: {
     const where: Prisma.VendorWhereInput = {};
     if (filters?.category && filters.category !== 'all') {
       where.category = filters.category;
+    }
+
+    const query = filters?.q?.trim();
+    if (query) {
+      where.OR = [
+        { name: { contains: query, mode: 'insensitive' } },
+        { service: { contains: query, mode: 'insensitive' } },
+      ];
     }
 
     const vendors = await prisma.vendor.findMany({
@@ -158,5 +167,55 @@ export async function deleteVendor(id: string) {
   } catch (error) {
     console.error('Error deleting vendor:', error);
     throw new Error('Erro ao deletar fornecedor');
+  }
+}
+
+export async function recordVendorPayment(vendorId: string, amount: number) {
+  const parsed = quickPaymentSchema.safeParse({ amount });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? 'Valor inválido');
+  }
+
+  try {
+    const vendor = await prisma.vendor.findUnique({
+      where: { id: vendorId },
+    });
+
+    if (!vendor) {
+      throw new Error('Fornecedor não encontrado');
+    }
+
+    const contracted = vendor.contracted_amount ? Number(vendor.contracted_amount) : 0;
+    const paid = Number(vendor.paid_amount);
+    const remaining = contracted - paid;
+
+    if (contracted <= 0) {
+      throw new Error('Fornecedor sem valor contratado');
+    }
+
+    if (remaining <= 0) {
+      throw new Error('Este fornecedor já está quitado');
+    }
+
+    if (parsed.data.amount > remaining + 0.009) {
+      throw new Error('Valor maior que o saldo em aberto');
+    }
+
+    const newPaid = Math.min(paid + parsed.data.amount, contracted);
+
+    await prisma.vendor.update({
+      where: { id: vendorId },
+      data: { paid_amount: newPaid },
+    });
+
+    revalidateVendorPages();
+    return { success: true, paid_amount: newPaid };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    console.error('Error recording payment:', error);
+    throw new Error('Erro ao registrar pagamento');
   }
 }

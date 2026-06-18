@@ -19,12 +19,20 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type VendorInput = {
   id?: string;
@@ -40,11 +48,105 @@ interface VendorFormProps {
   vendor?: VendorInput;
   trigger?: React.ReactElement;
   onSuccess?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }
 
-export function VendorForm({ vendor, trigger, onSuccess }: VendorFormProps) {
+function VendorFormFields({
+  register,
+  errors,
+  categoryValue,
+  setValue,
+  isSubmitting,
+  isEditing,
+}: {
+  register: ReturnType<typeof useForm<VendorFormData>>['register'];
+  errors: ReturnType<typeof useForm<VendorFormData>>['formState']['errors'];
+  categoryValue: string | undefined;
+  setValue: ReturnType<typeof useForm<VendorFormData>>['setValue'];
+  isSubmitting: boolean;
+  isEditing: boolean;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Nome</Label>
+        <Input id="name" {...register('name')} placeholder="Ex: João Fotografia" />
+        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="service">Serviço</Label>
+        <Input id="service" {...register('service')} placeholder="Ex: Fotografia e Filmagem" />
+        {errors.service && <p className="text-sm text-destructive">{errors.service.message}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="category">Categoria</Label>
+        <Select value={categoryValue} onValueChange={(val) => setValue('category', val || '')}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione uma categoria" />
+          </SelectTrigger>
+          <SelectContent>
+            {VENDOR_CATEGORIES.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="budgeted_amount">Valor Orçado</Label>
+          <Input id="budgeted_amount" type="number" step="0.01" {...register('budgeted_amount')} />
+          {errors.budgeted_amount && (
+            <p className="text-sm text-destructive">{errors.budgeted_amount.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="contracted_amount">Valor Contratado</Label>
+          <Input
+            id="contracted_amount"
+            type="number"
+            step="0.01"
+            {...register('contracted_amount')}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="paid_amount">Valor Pago</Label>
+        <Input id="paid_amount" type="number" step="0.01" {...register('paid_amount')} />
+        {errors.paid_amount && (
+          <p className="text-sm text-destructive">{errors.paid_amount.message}</p>
+        )}
+      </div>
+
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar'}
+      </Button>
+    </div>
+  );
+}
+
+export function VendorForm({
+  vendor,
+  trigger,
+  onSuccess,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  hideTrigger = false,
+}: VendorFormProps) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = controlledOnOpenChange ?? setInternalOpen;
   const isEditing = !!vendor?.id;
 
   const {
@@ -73,7 +175,7 @@ export function VendorForm({ vendor, trigger, onSuccess }: VendorFormProps) {
 
   const onSubmit = async (data: VendorFormData) => {
     try {
-      if (isEditing && vendor.id) {
+      if (isEditing && vendor?.id) {
         await updateVendor(vendor.id, data);
         toast.success('Fornecedor atualizado com sucesso!');
       } else {
@@ -94,82 +196,46 @@ export function VendorForm({ vendor, trigger, onSuccess }: VendorFormProps) {
     if (!newOpen) reset();
   };
 
+  const title = isEditing ? 'Editar Fornecedor' : 'Novo Fornecedor';
+  const defaultTrigger = <Button>Adicionar Fornecedor</Button>;
+
+  const form = (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <VendorFormFields
+        register={register}
+        errors={errors}
+        categoryValue={categoryValue}
+        setValue={setValue}
+        isSubmitting={isSubmitting}
+        isEditing={isEditing}
+      />
+    </form>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={handleOpenChange}>
+        {!hideTrigger && (
+          <SheetTrigger render={trigger || defaultTrigger} />
+        )}
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>{title}</SheetTitle>
+          </SheetHeader>
+          {form}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={trigger || <Button>Adicionar Fornecedor</Button>} />
+      {!hideTrigger && <DialogTrigger render={trigger || defaultTrigger} />}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Editar Fornecedor' : 'Novo Fornecedor'}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome</Label>
-            <Input id="name" {...register('name')} placeholder="Ex: João Fotografia" />
-            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="service">Serviço</Label>
-            <Input id="service" {...register('service')} placeholder="Ex: Fotografia e Filmagem" />
-            {errors.service && <p className="text-sm text-destructive">{errors.service.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="category">Categoria</Label>
-            <Select value={categoryValue} onValueChange={(val) => setValue('category', val || '')}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {VENDOR_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.category && (
-              <p className="text-sm text-destructive">{errors.category.message}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="budgeted_amount">Valor Orçado</Label>
-              <Input
-                id="budgeted_amount"
-                type="number"
-                step="0.01"
-                {...register('budgeted_amount')}
-              />
-              {errors.budgeted_amount && (
-                <p className="text-sm text-destructive">{errors.budgeted_amount.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contracted_amount">Valor Contratado</Label>
-              <Input
-                id="contracted_amount"
-                type="number"
-                step="0.01"
-                {...register('contracted_amount')}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="paid_amount">Valor Pago</Label>
-            <Input id="paid_amount" type="number" step="0.01" {...register('paid_amount')} />
-            {errors.paid_amount && (
-              <p className="text-sm text-destructive">{errors.paid_amount.message}</p>
-            )}
-          </div>
-
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
-          </Button>
-        </form>
+        {form}
       </DialogContent>
     </Dialog>
   );

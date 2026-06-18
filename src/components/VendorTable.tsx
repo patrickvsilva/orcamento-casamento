@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { VendorForm } from '@/components/VendorForm';
 import { DeleteVendorButton } from '@/components/DeleteVendorButton';
+import { VendorMobileCard } from '@/components/VendorMobileCard';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -197,51 +198,7 @@ export function VendorTable({
             Nenhum fornecedor cadastrado.
           </div>
         ) : (
-          vendors.map((vendor) => {
-            const remaining = getVendorRemaining(vendor);
-            const isFullyPaid = isVendorFullyPaid(vendor);
-
-            return (
-              <div
-                key={vendor.id}
-                className={cn(
-                  'rounded-xl border p-4',
-                  isFullyPaid ? 'border-primary/20 bg-primary/10' : 'bg-card',
-                )}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium">{vendor.name}</p>
-                    <p className="text-xs text-muted-foreground">{vendor.service}</p>
-                    <Badge variant="outline" className="mt-2">
-                      {vendor.category}
-                    </Badge>
-                  </div>
-                  <div className="text-right">
-                    {isFullyPaid ? (
-                      <Badge>Pago</Badge>
-                    ) : (
-                      <>
-                        <p className="font-semibold text-destructive">{formatCurrency(remaining)}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">falta pagar</p>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-3 flex gap-2">
-                  <VendorForm
-                    vendor={vendor}
-                    trigger={
-                      <Button variant="outline" size="sm" className="flex-1">
-                        Editar
-                      </Button>
-                    }
-                  />
-                  <DeleteVendorButton id={vendor.id} className="flex-1" />
-                </div>
-              </div>
-            );
-          })
+          vendors.map((vendor) => <VendorMobileCard key={vendor.id} vendor={vendor} />)
         )}
       </div>
     </>
