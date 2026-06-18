@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Clock, Home, List, MoreHorizontal, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/hooks/use-haptic';
 import { VendorForm } from '@/components/VendorForm';
 import { Button } from '@/components/ui/button';
 
@@ -47,6 +48,7 @@ export function LiquidGlassTabBar() {
             <Link
               key={tab.href}
               href={tab.href}
+              onClick={() => triggerHaptic(6)}
               className={cn(
                 'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full px-2 py-1.5 text-[10px] font-medium transition-colors',
                 isActive ? 'text-primary' : 'text-muted-foreground',
@@ -80,6 +82,7 @@ export function LiquidGlassTabBar() {
             <Link
               key={tab.href}
               href={tab.href}
+              onClick={() => triggerHaptic(6)}
               className={cn(
                 'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full px-2 py-1.5 text-[10px] font-medium transition-colors',
                 isActive ? 'text-primary' : 'text-muted-foreground',

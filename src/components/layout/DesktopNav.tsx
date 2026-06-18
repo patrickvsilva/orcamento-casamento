@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { VendorForm } from '@/components/VendorForm';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 
 const links = [
@@ -47,7 +48,10 @@ export function DesktopNav() {
             })}
           </nav>
         </div>
-        <VendorForm trigger={<Button>Adicionar Fornecedor</Button>} />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <VendorForm trigger={<Button>Adicionar Fornecedor</Button>} />
+        </div>
       </div>
     </header>
   );
