@@ -1,17 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { useLayoutEffect, useState } from 'react';
+
+function isStandalonePwa() {
+  if (typeof window === 'undefined') return false;
+
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    ('standalone' in navigator && (navigator as Navigator & { standalone?: boolean }).standalone === true)
+  );
+}
 
 export function PwaSplash() {
   const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      ('standalone' in navigator && (navigator as Navigator & { standalone?: boolean }).standalone);
-
-    if (!isStandalone) return;
+  useLayoutEffect(() => {
+    if (!isStandalonePwa()) return;
 
     const shown = sessionStorage.getItem('pwa-splash-shown');
     if (shown) return;
@@ -19,22 +23,28 @@ export function PwaSplash() {
     setVisible(true);
     sessionStorage.setItem('pwa-splash-shown', '1');
 
-    const timer = window.setTimeout(() => setVisible(false), 1400);
+    const timer = window.setTimeout(() => setVisible(false), 1200);
     return () => window.clearTimeout(timer);
   }, []);
 
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background motion-reduce:transition-none">
-      <div className="flex flex-col items-center gap-4 animate-in fade-in-0 zoom-in-95 duration-500">
-        <Image
-          src="/apple-icon"
+    <div
+      id="pwa-splash"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background motion-reduce:transition-none"
+      aria-hidden
+    >
+      <div className="flex flex-col items-center gap-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/apple-icon.png"
           alt=""
           width={96}
           height={96}
-          className="rounded-[22%] shadow-lg ring-1 ring-border"
-          priority
+          className="h-24 w-24 rounded-[22%] object-cover shadow-lg ring-1 ring-border"
+          decoding="sync"
+          fetchPriority="high"
         />
         <div className="text-center">
           <p className="font-heading text-xl font-semibold tracking-tight">Orçamento</p>
