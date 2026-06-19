@@ -3,6 +3,8 @@ import { parse } from 'csv-parse/sync';
 import * as dns from 'dns';
 import * as fs from 'fs';
 import { Pool } from 'pg';
+import { formatCsvDueDate } from '../src/lib/csv-dates';
+import { deriveCsvStatus } from '../src/lib/vendor-status';
 
 dns.setDefaultResultOrder('ipv6first');
 
@@ -13,6 +15,7 @@ type VendorRow = {
   budgeted_amount: string;
   contracted_amount: string | null;
   paid_amount: string;
+  next_due_date: Date | null;
 };
 
 type LegacyCsvRow = Record<string, string>;
@@ -32,12 +35,6 @@ function formatPaymentRatio(paid: number, contracted: number | null): string {
   if (!contracted || contracted <= 0) return '0';
   const ratio = paid / contracted;
   return ratio === 1 ? '1' : String(ratio);
-}
-
-function deriveStatus(budgeted: number, contracted: number | null, paid: number): string {
-  const contractedValue = contracted ?? 0;
-  if (contractedValue <= 0) return budgeted > 0 ? 'Orçado' : 'Verificar';
-  return paid >= contractedValue ? 'Fechado' : 'Fechado';
 }
 
 function escapeCsvField(value: string): string {
@@ -81,7 +78,7 @@ async function fetchVendors(): Promise<VendorRow[]> {
 
   try {
     const { rows } = await pool.query<VendorRow>(
-      `SELECT name, service, category, budgeted_amount, contracted_amount, paid_amount
+      `SELECT name, service, category, budgeted_amount, contracted_amount, paid_amount, next_due_date
        FROM vendors
        ORDER BY created_at ASC, name ASC`,
     );
@@ -101,7 +98,7 @@ async function fetchVendors(): Promise<VendorRow[]> {
 
       try {
         const { rows } = await ipv6Pool.query<VendorRow>(
-          `SELECT name, service, category, budgeted_amount, contracted_amount, paid_amount
+          `SELECT name, service, category, budgeted_amount, contracted_amount, paid_amount, next_due_date
            FROM vendors
            ORDER BY created_at ASC, name ASC`,
         );
@@ -135,6 +132,7 @@ async function main() {
       vendor.contracted_amount !== null ? Number(vendor.contracted_amount) : null;
     const paid = Number(vendor.paid_amount);
     const pending = contracted !== null ? Math.max(contracted - paid, 0) : 0;
+    const amounts = { budgeted_amount: budgeted, contracted_amount: contracted, paid_amount: paid };
 
     const fields = [
       vendor.name,
@@ -142,8 +140,8 @@ async function main() {
       vendor.category,
       formatPaymentRatio(paid, contracted),
       formatMoney(pending),
-      legacy?.['Próximo Vencimento'] ?? '',
-      legacy?.['Status'] ?? deriveStatus(budgeted, contracted, paid),
+      formatCsvDueDate(vendor.next_due_date),
+      legacy?.['Status'] ?? deriveCsvStatus(amounts),
       budgeted > 0 ? formatMoney(budgeted) : '',
       contracted !== null && contracted > 0 ? formatMoney(contracted) : '',
       paid > 0 ? formatMoney(paid) : '',

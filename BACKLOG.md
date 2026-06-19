@@ -7,6 +7,8 @@ Prioridades e status do produto. Atualizado em jun/2026.
 - ✅ Concluído
 - 🚧 Em andamento
 - ⬜ Pendente
+- ❌ Cancelado
+- 💡 Melhoria futura (desejável — fora do backlog efetivo)
 
 ---
 
@@ -74,8 +76,8 @@ Prioridades e status do produto. Atualizado em jun/2026.
 | ID | Item | Status |
 |----|------|--------|
 | DATA-01 | Prisma + PostgreSQL (Supabase prod, Docker local) | ✅ |
-| DATA-02 | Campo `next_due_date` para vencimentos | ⬜ |
-| DATA-03 | Enum de status (orçado / contratado / pago) | ⬜ |
+| DATA-02 | Campo `next_due_date` para vencimentos | ✅ |
+| DATA-03 | Enum de status (orçado / contratado / pago) | ❌ Status derivado dos valores já cobre o caso de uso |
 | DATA-04 | Seed a partir do CSV | ✅ |
 | DATA-05 | RLS habilitado em `vendors` | ✅ |
 
@@ -87,16 +89,37 @@ Prioridades e status do produto. Atualizado em jun/2026.
 |----|------|--------|
 | INFRA-01 | Deploy Vercel + Supabase pooler | ✅ |
 | INFRA-02 | Revalidação de cache multi-rota após CRUD | ✅ |
-| QA-01 | Testes unitários (use cases / actions) | ⬜ |
-| QA-02 | Autenticação multi-usuário | ⬜ |
-| QA-03 | Coluna "Valor pago" na tabela desktop | ⬜ |
-| QA-04 | Filtros e ordenação no banco (não só em memória) | ⬜ |
-| QA-05 | Colunas vencimento/status no CSV | ⬜ |
+| QA-01 | Testes unitários (use cases / actions) | ✅ |
+| QA-02 | Autenticação multi-usuário | ❌ App de uso pessoal do casal; sem necessidade de login |
+| QA-03 | Coluna "Valor pago" na tabela desktop | ✅ |
+| QA-04 | Filtros e ordenação no banco (não só em memória) | ✅ |
+| QA-05 | Colunas vencimento/status no CSV | ✅ |
 
 ---
 
 ## Próximo foco sugerido
 
-1. **DATA-02 / DATA-03** — vencimentos e status explícito  
-2. **QA-01** — testes unitários nas server actions  
-3. **QA-03** — coluna "Valor pago" na tabela desktop
+1. **Melhorias futuras** — push PWA, export ICS (ver seção abaixo)  
+2. Revisar dados de produção após migration de `next_due_date`  
+3. Rodar `npm run db:seed` para importar vencimentos do CSV
+
+---
+
+## Melhorias futuras (desejáveis)
+
+> Itens fora do backlog efetivo: bons candidatos, mas sem prioridade ou escopo definido. Não entram no planejamento de sprint até serem promovidos.
+
+### PWA e notificações
+
+| ID | Item | Notas |
+|----|------|-------|
+| PWA-06 | Web Push no iPhone (PWA instalada) | iOS 16.4+; exige permissão do usuário, VAPID, subscription no banco e handler `push` no service worker |
+| PWA-07 | Lembretes de vencimento por push | Depende de **DATA-02** (`next_due_date`) + **PWA-06**; ex.: “pagamento de X vence em 3 dias” |
+| PWA-08 | Exportar vencimentos para Calendário (ICS) | Alternativa mais simples que push; sem backend de notificação |
+
+### Outras ideias
+
+| ID | Item | Notas |
+|----|------|-------|
+| IDEA-01 | E-mail ou WhatsApp de lembrete | Integração externa; útil se push PWA não for suficiente |
+| IDEA-02 | Widget na Tela de Início (iOS) | Limitado em PWA; avaliar só se virar app nativo |

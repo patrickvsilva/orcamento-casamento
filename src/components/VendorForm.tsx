@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { toDateInputValue } from '@/lib/utils';
 
 type VendorInput = {
   id?: string;
@@ -42,6 +43,7 @@ type VendorInput = {
   budgeted_amount?: number;
   contracted_amount?: number | null;
   paid_amount?: number;
+  next_due_date?: Date | string | null;
 };
 
 interface VendorFormProps {
@@ -127,6 +129,14 @@ function VendorFormFields({
         )}
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="next_due_date">Próximo vencimento</Label>
+        <Input id="next_due_date" type="date" {...register('next_due_date')} />
+        {errors.next_due_date && (
+          <p className="text-sm text-destructive">{errors.next_due_date.message}</p>
+        )}
+      </div>
+
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar'}
       </Button>
@@ -165,6 +175,7 @@ export function VendorForm({
       budgeted_amount: vendor?.budgeted_amount || 0,
       contracted_amount: vendor?.contracted_amount || null,
       paid_amount: vendor?.paid_amount || 0,
+      next_due_date: toDateInputValue(vendor?.next_due_date),
     },
   });
 

@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { parse } from 'csv-parse/sync';
 import * as fs from 'fs';
 import { normalizeCategory } from './src/lib/categories';
+import { parseCsvDueDate } from './src/lib/csv-dates';
 import { prisma } from './src/lib/db';
 
 type CsvRecord = Record<string, string>;
@@ -39,6 +40,7 @@ async function upsertVendor(data: {
   budgeted_amount: number;
   contracted_amount: number | null;
   paid_amount: number;
+  next_due_date: Date | null;
 }) {
   const existing = await prisma.vendor.findFirst({
     where: { name: data.name },
@@ -79,6 +81,7 @@ async function main() {
     const paid = parseMoney(record['Valor Pago']);
     const budgeted = resolveBudgeted(record, contracted, paid);
     const service = record['Serviço']?.trim() || name;
+    const nextDueDate = parseCsvDueDate(record['Próximo Vencimento']);
 
     const result = await upsertVendor({
       name,
@@ -87,6 +90,7 @@ async function main() {
       budgeted_amount: budgeted,
       contracted_amount: contracted,
       paid_amount: paid,
+      next_due_date: nextDueDate,
     });
 
     if (result === 'criado') {

@@ -12,9 +12,16 @@ export const vendorSchema = z.object({
   budgeted_amount: z.coerce.number().min(0, 'Valor orçado inválido'),
   contracted_amount: z.coerce.number().nullable().optional(),
   paid_amount: z.coerce.number().min(0, 'Valor pago inválido').default(0),
+  next_due_date: z.string().optional(),
 });
 
 export type VendorFormData = z.infer<typeof vendorSchema>;
+
+export function parseDueDateInput(value?: string | null): Date | null {
+  if (!value?.trim()) return null;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
 
 export const quickPaymentSchema = z.object({
   amount: z.coerce.number().positive('Informe um valor maior que zero'),
