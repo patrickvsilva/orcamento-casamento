@@ -100,8 +100,7 @@ Prioridades e status do produto. Atualizado em jun/2026.
 ## Próximo foco sugerido
 
 1. **Melhorias futuras** — push PWA, export ICS (ver seção abaixo)  
-2. Revisar dados de produção após migration de `next_due_date`  
-3. Rodar `npm run db:seed` para importar vencimentos do CSV
+2. Preencher vencimentos manualmente no app, se necessário
 
 ---
 
