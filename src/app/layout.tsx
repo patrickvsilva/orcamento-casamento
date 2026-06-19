@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   title: 'Orçamento Casamento',
   description: 'Controle financeiro dos fornecedores do seu casamento',
   applicationName: 'Orçamento Casamento',
+  icons: {
+    icon: [{ url: '/icon.png', sizes: '32x32', type: 'image/png' }],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+    shortcut: '/favicon.ico',
+  },
   appleWebApp: {
     capable: true,
     title: 'Orçamento',

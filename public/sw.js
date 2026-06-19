@@ -1,7 +1,13 @@
-const CACHE_NAME = 'orcamento-casamento-v1';
+const CACHE_NAME = 'orcamento-casamento-v2';
 const OFFLINE_URL = '/offline';
 
-const PRECACHE_URLS = [OFFLINE_URL, '/manifest.webmanifest', '/favicon.ico', '/icon', '/apple-icon'];
+const PRECACHE_URLS = [
+  OFFLINE_URL,
+  '/manifest.webmanifest',
+  '/favicon.ico',
+  '/icon.png',
+  '/apple-icon.png',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -41,8 +47,8 @@ self.addEventListener('fetch', (event) => {
   const isStaticAsset =
     url.pathname.startsWith('/_next/static/') ||
     url.pathname === '/favicon.ico' ||
-    url.pathname === '/icon' ||
-    url.pathname === '/apple-icon' ||
+    url.pathname === '/icon.png' ||
+    url.pathname === '/apple-icon.png' ||
     url.pathname === '/manifest.webmanifest';
 
   if (isStaticAsset) {
