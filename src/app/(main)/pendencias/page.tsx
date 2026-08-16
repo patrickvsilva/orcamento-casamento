@@ -2,6 +2,8 @@ import { QuickPaymentActions } from '@/components/QuickPaymentActions';
 import { DeleteVendorButton } from '@/components/DeleteVendorButton';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { buildCashSnapshot, fetchCashData } from '@/lib/cash-data';
+import { isCashCovered } from '@/lib/cash-utils';
 import {
   computeBudgetTotals,
   fetchVendors,
@@ -11,7 +13,7 @@ import {
 import { formatCurrency, formatDueDate } from '@/lib/utils';
 
 export default async function PendenciasPage() {
-  const vendors = await fetchVendors();
+  const [vendors, { settings, incomes }] = await Promise.all([fetchVendors(), fetchCashData()]);
   const pendingVendors = vendors
     .filter((v) => !isVendorFullyPaid(v) && (v.contracted_amount || 0) > 0)
     .sort((a, b) => {
@@ -24,6 +26,10 @@ export default async function PendenciasPage() {
     });
 
   const { totalRemaining } = computeBudgetTotals(vendors);
+  const cash = buildCashSnapshot(settings.starting_balance, incomes, vendors);
+  const cashCovered = isCashCovered(cash.coverage);
+  const upcomingUncovered =
+    cash.upcomingDueRemaining > 0 && cash.cashOnHand < cash.upcomingDueRemaining;
 
   return (
     <main className="container mx-auto space-y-6 px-4 py-6 md:space-y-8 md:py-8">
@@ -44,6 +50,15 @@ export default async function PendenciasPage() {
             {pendingVendors.length}{' '}
             {pendingVendors.length === 1 ? 'fornecedor pendente' : 'fornecedores pendentes'}
           </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Caixa cobre {formatCurrency(cash.projected)} de {formatCurrency(totalRemaining)}
+            {cashCovered ? '' : ` · faltam ${formatCurrency(Math.abs(cash.coverage))}`}
+          </p>
+          {upcomingUncovered && (
+            <p className="mt-2 text-sm text-destructive">
+              Caixa atual não cobre os vencimentos ({formatCurrency(cash.upcomingDueRemaining)}).
+            </p>
+          )}
         </CardContent>
       </Card>
 

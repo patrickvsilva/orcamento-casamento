@@ -29,4 +29,18 @@ export const quickPaymentSchema = z.object({
 
 export type QuickPaymentData = z.infer<typeof quickPaymentSchema>;
 
+export const incomeSchema = z.object({
+  description: z.string().min(2, 'Descrição deve ter pelo menos 2 caracteres'),
+  amount: z.coerce.number().positive('Informe um valor maior que zero'),
+  expected_date: z.string().optional(),
+});
+
+export type IncomeFormData = z.infer<typeof incomeSchema>;
+
+export const startingBalanceSchema = z.object({
+  starting_balance: z.coerce.number().min(0, 'Saldo inicial inválido'),
+});
+
+export type StartingBalanceData = z.infer<typeof startingBalanceSchema>;
+
 export { VENDOR_CATEGORIES };

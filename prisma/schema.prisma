@@ -25,3 +25,25 @@ model Vendor {
   @@index([next_due_date], map: "vendors_next_due_date_idx")
   @@map("vendors")
 }
+
+model CashSettings {
+  id               String   @id
+  starting_balance Decimal  @default(0) @db.Decimal(10, 2)
+  updated_at       DateTime @updatedAt
+
+  @@map("cash_settings")
+}
+
+model Income {
+  id            String    @id @default(uuid())
+  description   String
+  amount        Decimal   @db.Decimal(10, 2)
+  expected_date DateTime? @map("expected_date")
+  received_at   DateTime? @map("received_at")
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  @@index([expected_date], map: "incomes_expected_date_idx")
+  @@index([received_at], map: "incomes_received_at_idx")
+  @@map("incomes")
+}

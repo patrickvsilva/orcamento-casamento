@@ -1,8 +1,21 @@
 'use server';
 
 import { prisma } from '@/lib/db';
-import { vendorSchema, VendorFormData, quickPaymentSchema, parseDueDateInput } from '@/lib/validations';
+import {
+  vendorSchema,
+  VendorFormData,
+  quickPaymentSchema,
+  parseDueDateInput,
+  incomeSchema,
+  IncomeFormData,
+  startingBalanceSchema,
+} from '@/lib/validations';
 import { findVendors } from '@/lib/vendor-repository';
+import {
+  findIncomes,
+  getOrCreateCashSettings,
+  upsertStartingBalance,
+} from '@/lib/cash-repository';
 import { validatePaymentAmount } from '@/lib/vendor-payment';
 import { revalidatePath } from 'next/cache';
 
@@ -11,6 +24,7 @@ function revalidateVendorPages() {
   revalidatePath('/fornecedores');
   revalidatePath('/pendencias');
   revalidatePath('/mais');
+  revalidatePath('/caixa');
 }
 
 export async function getVendors(filters?: Parameters<typeof findVendors>[0]) {
@@ -130,5 +144,133 @@ export async function recordVendorPayment(vendorId: string, amount: number) {
     }
     console.error('Error recording payment:', error);
     throw new Error('Erro ao registrar pagamento');
+  }
+}
+
+export async function getCashSettings() {
+  try {
+    return await getOrCreateCashSettings();
+  } catch (error) {
+    console.error('Error fetching cash settings:', error);
+    throw new Error('Erro ao buscar o caixa');
+  }
+}
+
+export async function updateStartingBalance(amount: number) {
+  const parsed = startingBalanceSchema.safeParse({ starting_balance: amount });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? 'Saldo inicial inválido');
+  }
+
+  try {
+    const settings = await upsertStartingBalance(parsed.data.starting_balance);
+    revalidateVendorPages();
+    return { success: true, starting_balance: settings.starting_balance };
+  } catch (error) {
+    console.error('Error updating starting balance:', error);
+    throw new Error('Erro ao atualizar o saldo inicial');
+  }
+}
+
+export async function getIncomes() {
+  try {
+    return await findIncomes();
+  } catch (error) {
+    console.error('Error fetching incomes:', error);
+    throw new Error('Erro ao buscar receitas');
+  }
+}
+
+export async function createIncome(data: IncomeFormData) {
+  const parsed = incomeSchema.safeParse(data);
+
+  if (!parsed.success) {
+    throw new Error('Dados inválidos');
+  }
+
+  try {
+    await prisma.income.create({
+      data: {
+        description: parsed.data.description,
+        amount: parsed.data.amount,
+        expected_date: parseDueDateInput(parsed.data.expected_date),
+      },
+    });
+
+    revalidateVendorPages();
+    return { success: true };
+  } catch (error) {
+    console.error('Error creating income:', error);
+    throw new Error('Erro ao criar receita');
+  }
+}
+
+export async function updateIncome(id: string, data: IncomeFormData) {
+  const parsed = incomeSchema.safeParse(data);
+
+  if (!parsed.success) {
+    throw new Error('Dados inválidos');
+  }
+
+  try {
+    await prisma.income.update({
+      where: { id },
+      data: {
+        description: parsed.data.description,
+        amount: parsed.data.amount,
+        expected_date: parseDueDateInput(parsed.data.expected_date),
+      },
+    });
+
+    revalidateVendorPages();
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating income:', error);
+    throw new Error('Erro ao atualizar receita');
+  }
+}
+
+export async function deleteIncome(id: string) {
+  try {
+    await prisma.income.delete({
+      where: { id },
+    });
+
+    revalidateVendorPages();
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting income:', error);
+    throw new Error('Erro ao excluir receita');
+  }
+}
+
+export async function markIncomeReceived(id: string) {
+  try {
+    await prisma.income.update({
+      where: { id },
+      data: { received_at: new Date() },
+    });
+
+    revalidateVendorPages();
+    return { success: true };
+  } catch (error) {
+    console.error('Error marking income received:', error);
+    throw new Error('Erro ao marcar receita como recebida');
+  }
+}
+
+export async function unmarkIncomeReceived(id: string) {
+  try {
+    await prisma.income.update({
+      where: { id },
+      data: { received_at: null },
+    });
+
+    revalidateVendorPages();
+    return { success: true };
+  } catch (error) {
+    console.error('Error unmarking income received:', error);
+    throw new Error('Erro ao desmarcar receita');
   }
 }

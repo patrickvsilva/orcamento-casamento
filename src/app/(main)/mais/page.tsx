@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ChevronRight, Heart, List, Clock, Palette } from 'lucide-react';
+import { ChevronRight, Heart, List, Clock, Palette, Wallet } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt';
@@ -70,6 +70,20 @@ export default async function MaisPage() {
             <div>
               <p className="font-medium">Pendências</p>
               <p className="text-xs text-muted-foreground">Pagamentos em aberto</p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </Link>
+
+        <Link
+          href="/caixa"
+          className="flex items-center justify-between rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50"
+        >
+          <div className="flex items-center gap-3">
+            <Wallet className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="font-medium">Caixa</p>
+              <p className="text-xs text-muted-foreground">Saldo e receitas a entrar</p>
             </div>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
